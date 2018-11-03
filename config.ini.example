@@ -1,3 +1,5 @@
 [toggl]
 workspace_id =
 api_token    =
+tag_insitu   = In situ
+tag_urgent   = urgente

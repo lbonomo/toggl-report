@@ -1,2 +1,5 @@
+*~
 config.ini
 .idea
+upload.sh
+__pycache__/
