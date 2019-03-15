@@ -2,35 +2,56 @@
 # -*- coding: utf-8 -*-
 
 from calendar import monthrange
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import re
 
-def last_month():
+
+def get_date_range(date_trange):
     """
     Devuelve la fecha en formto 'YYY-MM-DD' del comienzo y el fin del mes anterior
     :return:
     """
-    now = datetime.now()
-    year = now.year
-    month = now.month - 1
-    start = "%04d-%02d-%02d" % (year, month, 1)
-    end = "%04d-%02d-%02d" % (year, month, monthrange(year, month)[1])
-    return {
-        'start': start,
-        'end': end
-    }
 
-
-def this_month():
-    """
-    Devuelve la fecha en formto 'YYY-MM-DD' del comienzo y el fin del mes anterior
-    :return:
-    """
     now = datetime.now()
-    year = now.year
-    month = now.month - 1
-    start = "%04d-%02d-%02d" % (year, month, 1)
-    end = "%04d-%02d-%02d" % (year, month, monthrange(year, month)[1])
+    today = date.today()
+    doy = today.timetuple().tm_yday
+    (iso_year, iso_weeknumber, iso_weekday) = today.isocalendar()
+    yesterday = today - timedelta(days=1)
+    this_year = now.year
+    this_month = now.month
+    last_year = now.year - 1
+    last_month = now.month - 1
+
+    if (date_trange == "LastMonth"):
+        if (doy == 1):
+            start = "%04d-%02d-%02d" % (this_year-1, 12, 1)
+            end = "%04d-%02d-%02d" % (this_year-1, 12, 31)
+        else:
+            start = "%04d-%02d-%02d" % (this_year, last_month, 1)
+            end = "%04d-%02d-%02d" % (this_year, last_month, monthrange(this_year, last_month)[1])
+
+    if (date_trange == "ThisMonth"):
+        start = "%04d-%02d-%02d" % (this_year, this_month, 1)
+        end = "%04d-%02d-%02d" % (this_year, this_month, monthrange(this_year, this_month)[1])
+
+    if (date_trange == "Today"):
+        start = today.strftime('%Y-%m-%d')
+        end = start
+
+    if (date_trange == "Yesterday"):
+        start = yesterday.strftime('%Y-%m-%d')
+        end = start
+
+    if (date_trange == "ThisWeek"):
+        startweek = today - timedelta(days=iso_weekday)
+        start = startweek.strftime('%Y-%m-%d')
+        end = (startweek + timedelta(days=6)).strftime('%Y-%m-%d')
+
+    if (date_trange == "LastWeek"):
+        startweek = today - timedelta(days=( iso_weekday + 7))
+        start = startweek.strftime('%Y-%m-%d')
+        end = (startweek + timedelta(days=6)).strftime('%Y-%m-%d')
+
     return {
         'start': start,
         'end': end
@@ -91,5 +112,4 @@ def taskdatetime_to_datetime(stringtime):
 
 
 if __name__ == '__main__':
-
     pass

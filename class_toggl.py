@@ -5,8 +5,7 @@ import urllib.parse
 import requests
 import configparser
 from datetime import datetime
-from tools import last_month, milliseconds_to_str, taskdatetime_to_datetime, milliseconds_to_hours_decimal
-
+from tools import get_date_range, milliseconds_to_str, taskdatetime_to_datetime, milliseconds_to_hours_decimal
 
 # https://github.com/toggl/toggl_api_docs/blob/master/reports.md
 
@@ -36,6 +35,13 @@ class TogglClient:
             })
         return clients
 
+    def list_date_range(self):
+        list = ['Today', 'Yesterday',
+            'ThisWeek', 'LastWeek',
+            'ThisMonth', 'LastMonth',
+            'ThisYear', 'LastYear']
+        return list
+
     def get_client_id(self, client_name):
         url = 'https://www.toggl.com/api/v8/workspaces/%s/clients' % self.workspace_id
 
@@ -47,6 +53,16 @@ class TogglClient:
                 cliente_id = False
 
         return cliente_id
+
+    def list_tags(self):
+        url = 'https://www.toggl.com/api/v8/workspaces/%s/tags' % self.workspace_id
+        tags = []
+        for i in self.get_data(url):
+            tags.append({
+                'id': i['id'],
+                'name': i['name']
+            })
+        return tags
 
     def get_tag_id(self, tag_name):
         url = 'https://www.toggl.com/api/v8/workspaces/%s/tags' % self.workspace_id
@@ -60,18 +76,19 @@ class TogglClient:
 
         return tag_id
 
-    def last_month_common_dataquery(self):
+    def query_date_range(self, date_range="LastMonth"):
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
+
         data = {}
         data['page'] = 1
         data['user_agent'] = "Vanguard Toggl Report"
         data['workspace_id'] = self.workspace_id
-        data['since'] = last_month()['start']
-        data['until'] = last_month()['end']
+        data['since'] = get_date_range(date_range)['start']
+        data['until'] = get_date_range(date_range)['end']
         data['order_field'] = 'amount'
         return data
 
-    def last_month_report_by_client(self, client):
+    def report_by_client(self, client, date_range):
         """
         Reporte de horas trabajadas por clientes
         :param client:
@@ -79,6 +96,7 @@ class TogglClient:
         """
         url = 'https://toggl.com/reports/api/v2/details'
         # url = 'https://toggl.com/reports/api/v2/summary'  # Summary report URL
+
 
         monthly_summary = {
             'in-situ': {
@@ -108,7 +126,7 @@ class TogglClient:
         }
 
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
-        data = self.last_month_common_dataquery()
+        data = self.query_date_range(date_range)
         data['client_ids'] = self.get_client_id(client)
         data['order_field'] = 'date'
         data['order_desc'] = 'off'
@@ -155,13 +173,11 @@ class TogglClient:
             print("%-35s = %6.2f" % (v['label'], v['value']))
 
 
-
-    def last_month_tag_time(self, tag):
+    def report_by_tag_totaltime(self, tag, date_range):
         url = 'https://toggl.com/reports/api/v2/summary'  # Summary report URL
 
-        data = self.last_month_common_dataquery()
+        data = self.query_date_range(date_range)
         data['tag_ids'] = self.get_tag_id(tag)
-
         url_values = urllib.parse.urlencode(data)
         full_url = url + '?' + url_values
         # print(full_url)
