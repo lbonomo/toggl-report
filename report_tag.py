@@ -31,6 +31,3 @@ if __name__ == '__main__':
         print(togg.report_by_tag_totaltime(args.tag, args.date_range))
 
 
-
-    # if
-    #     togg.report_by_tag(args.tag, args.date_range)
