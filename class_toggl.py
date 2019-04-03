@@ -76,11 +76,10 @@ class TogglClient:
 
         return tag_id
 
-    def query_date_range(self, date_range="LastMonth"):
+    def query_date_range(self, page=1, date_range="LastMonth"):
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
-
         data = {}
-        data['page'] = 1
+        data['page'] = page
         data['user_agent'] = "Vanguard Toggl Report"
         data['workspace_id'] = self.workspace_id
         data['since'] = get_date_range(date_range)['start']
@@ -96,7 +95,6 @@ class TogglClient:
         """
         url = 'https://toggl.com/reports/api/v2/details'
         # url = 'https://toggl.com/reports/api/v2/summary'  # Summary report URL
-
 
         monthly_summary = {
             'in-situ': {
@@ -126,7 +124,7 @@ class TogglClient:
         }
 
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
-        data = self.query_date_range(date_range)
+        data = self.query_date_range(1, date_range)
         data['client_ids'] = self.get_client_id(client)
         data['order_field'] = 'date'
         data['order_desc'] = 'off'
@@ -136,11 +134,19 @@ class TogglClient:
         full_url = url + '?' + url_values
 
         x = self.get_data(full_url)
-        # print(x)
         print("\n==== Trabajos realizados ====")
         conunt = 1
+        toggl_data = x['data']
 
-        for i in x['data']:
+        while (x['total_count'] > (x['per_page'] * data['page'])):
+            # x['total_count'] > x['per_page']
+            data['page'] += 1
+            url_values = urllib.parse.urlencode(data)
+            full_url = url + '?' + url_values
+            x = self.get_data(full_url)
+            toggl_data +=x['data']
+
+        for i in toggl_data:
             # Make summary
             if self.tag_insitu in i['tags']:
                 if self.tag_urgent in i['tags']:
@@ -164,7 +170,6 @@ class TogglClient:
             task_start = datetime.strftime(taskdatetime_to_datetime(i['start'])[0], "%d/%m/%Y %H:%M")
 
             print("%s - %s (%s [%sh])" % (task_start, i['description'], stime, dtime))
-
             # print("%s | %s %s" % (('%02d' % conunt), milliseconds_to_hours(i['time']), i['title']['time_entry']))
             conunt += 1
 

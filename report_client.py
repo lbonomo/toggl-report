@@ -5,13 +5,13 @@ import sys
 from class_toggl import TogglClient
 import argparse
 
+# togg = TogglClient()
+# togg.report_by_client('Bieler', 'LastMonth')
 
 if __name__ == '__main__':
 
     # clientes = ['Bieler', 'Colombero']
     # tags = ['no-remunerable', 'remunerable']
-
-
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
@@ -29,4 +29,4 @@ if __name__ == '__main__':
         for t in togg.list_clients():
             print(t['name'])
     else:
-        print(togg.report_by_client(args.client, args.date_range))
+        togg.report_by_client(args.client, args.date_range)
