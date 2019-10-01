@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-c', '--client', dest='client', type=str, help='Intrese un cliente')
     parser.add_argument('-d', '--daterange', dest='date_range', type=str,
-        choices=['Today', 'Yesterday', 'ThisWeek', 'LastWeek', 'ThisMonth', 'LastMonth'],
+        choices=['Today', 'Yesterday', 'ThisWeek', 'LastWeek', 'ThisMonth', 'LastMonth', 'Q1', 'Q2', 'Q3', 'Q4'],
         default='LastMonth', help='Selecione un rango de fecha')
 
     args = parser.parse_args()

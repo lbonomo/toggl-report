@@ -76,10 +76,10 @@ class TogglClient:
 
         return tag_id
 
-    def query_date_range(self, page=1, date_range="LastMonth"):
+    def query_date_range(self, date_range="LastMonth"):
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
         data = {}
-        data['page'] = page
+        data['page'] = 1
         data['user_agent'] = "Vanguard Toggl Report"
         data['workspace_id'] = self.workspace_id
         data['since'] = get_date_range(date_range)['start']
@@ -124,7 +124,7 @@ class TogglClient:
         }
 
         # https://github.com/toggl/toggl_api_docs/blob/master/reports.md#request-parameters
-        data = self.query_date_range(1, date_range)
+        data = self.query_date_range(date_range)
         data['client_ids'] = self.get_client_id(client)
         data['order_field'] = 'date'
         data['order_desc'] = 'off'
